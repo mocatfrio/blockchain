@@ -3,7 +3,7 @@
 import datetime
 import hashlib
 import json
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 # 1. Blockchain (Server)
 class Blockchain:
@@ -11,17 +11,18 @@ class Blockchain:
     def __init__(self):
         self.chain = []
         # genesis block
-        self.create_block(proof = 1, prev_hash = '0', proof_of_work = None)
+        self.create_block(proof = 1, prev_hash = '0')
 
-    def create_block(self, proof, prev_hash, proof_of_work):
+    def create_block(self, proof, prev_hash, proof_of_work=None, data=None):
         block = {
             'id_block': len(self.chain) + 1,
             'timestamp': str(datetime.datetime.now()),
             'proof': proof,
             'prev_hash': prev_hash,
-            # 'hash': hash_block,
-            'proof_of_work': proof_of_work
+            'proof_of_work': proof_of_work,
+            'data': data
         }
+        block['hash'] = self.get_hash(block)
         self.chain.append(block)
         return block
 
@@ -65,6 +66,9 @@ class Blockchain:
             now_index += 1
         return True
 
+    def modify_block(self):
+        pass
+
 
 # 2. Web Aplikasi untuk Testing
 app = Flask(__name__)
@@ -88,6 +92,7 @@ def mining():
     proof, proof_of_work = blockchain.proof_of_work(prev_proof) 
     # get prev hash 
     prev_hash = blockchain.get_hash(prev_block)
+    # prev_hash = prev_block['hash']
     # create block 
     created_block = blockchain.create_block(proof, prev_hash, proof_of_work)
     response = {
@@ -96,9 +101,32 @@ def mining():
     }
     return jsonify(response), 200
 
+
+@app.route("/create", methods=['POST'])
+def create_block():
+    data = request.form
+
+    prev_block = blockchain.get_last_block()
+    # get prev proof 
+    prev_proof = prev_block['proof']
+    proof, proof_of_work = blockchain.proof_of_work(prev_proof) 
+    # get prev hash 
+    prev_hash = blockchain.get_hash(prev_block)
+    # create block 
+    created_block = blockchain.create_block(proof, prev_hash, proof_of_work, data['data'])
+    response = {
+        'message': "Blockchain is successfully created",
+        'created block': created_block
+    }
+    return jsonify(response), 200
+
+    
+
+
 app.run()
 
 # Tugas 
 # 1. Buatkan endpoint yang mengecek apakah chainnya valid
 # 2. Simpan hash block didalam blocknya
-# 3. Fungsi dan endpoint yang mensimulasikan adanya modifikasi didalam block, sehingga chainnya tidak valid
+# 3. Tambah data diddalam block
+# 4. Fungsi dan endpoint yang mensimulasikan adanya modifikasi didalam block, sehingga chainnya tidak valid
