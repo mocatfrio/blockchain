@@ -96,7 +96,9 @@ def mining():
     }
     return jsonify(response), 200
 
-# Buatkan endpoint yang mengecek apakah chainnya valid
-# Simpan hash block didalam blocknya
-
 app.run()
+
+# Tugas 
+# 1. Buatkan endpoint yang mengecek apakah chainnya valid
+# 2. Simpan hash block didalam blocknya
+# 3. Fungsi dan endpoint yang mensimulasikan adanya modifikasi didalam block, sehingga chainnya tidak valid
